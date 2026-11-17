@@ -1,0 +1,22 @@
+Lista para melhoramentos de aplicação de qualidade do meu amorlindo
+- Dashboard:
+    - Recebido este mês: dividir quanto é da InLuto e quanto é de casos privados, o mesmo para o por receber e adicionar um total (ou então ter só o total aqui e depois nos relatórios poder consultar coisas mais específicas)
+    - Carolina ALVES?????
+- Utentes: 
+    - Gostava que desse para ver quantas sessões já houve por utente. Por exemplo na página dos utentes ver quantas consultas houve por cada pessoa
+    - Ser InLuto vs. Privado, para diferenciar % de retenção
+- Agenda: 
+    -  maybe colocar filtros? Na página da agenda poder haver um filtro para o estado e para o utente
+    - Poder ver na agenda se a modalidade é online ou presencial na tabela, se puder ter um O ou um P já é suficiente para saber 
+- Nos pagamentos: 
+    - adicionar o método “cartão débito”
+    - editar pagamento, poder eliminar 
+    - Se foi faturado/nao, passado recibo ou não 
+    - Melhorar a forma de procurar a consulta a faturar, assim fica demasiada informação porque aparecem todas da mesma forma
+    - Organizar por utente ou então por data
+    - Colocar também um filtro no estado, no utente 
+- Relatórios:
+    - Questão de pagamento a receber 
+    - Recebido desde sempre, quanto? Gostava que desse para ver
+    - Quanto é a % que devo à InLuto do total
+    - Quanto é que recebi de casos meus
