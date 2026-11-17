@@ -32,7 +32,15 @@ test('rejeita uma comissão cuja soma não é 100%', async () => {
   await expect(repositories.putAppointment(appointment)).rejects.toThrow('100%')
 })
 
-test('migra uma base versão 1 e cria a tabela de definições da versão 2', async () => {
-  const name = `migration-${crypto.randomUUID()}`; const legacy = new Dexie(name); legacy.version(1).stores({ patients: '&id', appointments: '&id, patientId, roomId', rooms: '&id', payments: '&id, appointmentId', paymentMethods: '&id', commissionRules: '&id' }); await legacy.open(); await legacy.table('patients').put({ id: crypto.randomUUID(), payload: '{}' }); legacy.close()
-  const migrated = new PracticeDatabase(name); await migrated.open(); expect(migrated.verno).toBe(3); await migrated.settings.put({ id: 'application', payload: '{}' }); expect(await migrated.settings.count()).toBe(1); migrated.close(); await Dexie.delete(name)
+test('migra uma base antiga, remove índices relacionáveis em claro e preserva os registos', async () => {
+  const name = `migration-${crypto.randomUUID()}`; const legacy = new Dexie(name); legacy.version(1).stores({ patients: '&id', appointments: '&id, patientId, roomId', rooms: '&id', payments: '&id, appointmentId', paymentMethods: '&id', commissionRules: '&id' }); await legacy.open()
+  await legacy.table('patients').put({ id: 'patient-id', payload: '{}' })
+  await legacy.table('appointments').put({ id: 'appointment-id', patientId: 'patient-id', roomId: 'room-id', payload: '{}' })
+  await legacy.table('payments').put({ id: 'payment-id', appointmentId: 'appointment-id', payload: '{}' })
+  legacy.close()
+  const migrated = new PracticeDatabase(name); await migrated.open(); expect(migrated.verno).toBe(4)
+  expect(await migrated.patients.get('patient-id')).toEqual({ id: 'patient-id', payload: '{}' })
+  expect(await migrated.appointments.get('appointment-id')).toEqual({ id: 'appointment-id', payload: '{}' })
+  expect(await migrated.payments.get('payment-id')).toEqual({ id: 'payment-id', payload: '{}' })
+  await migrated.settings.put({ id: 'application', payload: '{}' }); expect(await migrated.settings.count()).toBe(1); migrated.close(); await Dexie.delete(name)
 })
