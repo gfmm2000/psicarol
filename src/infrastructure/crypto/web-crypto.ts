@@ -1,0 +1,11 @@
+import type { EncryptedPayloadV1 } from './types'
+const encoder = new TextEncoder(); const decoder = new TextDecoder()
+const toBase64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes))
+const fromBase64 = (value: string) => Uint8Array.from(atob(value), char => char.charCodeAt(0))
+export const randomBytes = (length: number) => { const bytes = new Uint8Array(length); crypto.getRandomValues(bytes); return bytes }
+export const assertCryptoAvailable = () => { if (!globalThis.crypto?.subtle || !globalThis.crypto?.getRandomValues) throw new Error('Criptografia não suportada neste navegador.') }
+export const aadFor = (table: string, id: string) => encoder.encode(`psicarol:v1:${table}:${id}`)
+export async function encryptJson(key: CryptoKey, value: unknown, aad: Uint8Array): Promise<EncryptedPayloadV1> { const iv = randomBytes(12); const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv as unknown as BufferSource, additionalData: aad as unknown as BufferSource, tagLength: 128 }, key, encoder.encode(JSON.stringify(value))); return { cryptoVersion: 1, iv: toBase64(iv), ciphertext: toBase64(new Uint8Array(ciphertext)) } }
+export async function decryptJson<T>(key: CryptoKey, payload: EncryptedPayloadV1, aad: Uint8Array): Promise<T> { if (payload.cryptoVersion !== 1) throw new Error('Formato cifrado não suportado.'); const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromBase64(payload.iv) as unknown as BufferSource, additionalData: aad as unknown as BufferSource, tagLength: 128 }, key, fromBase64(payload.ciphertext) as unknown as BufferSource); return JSON.parse(decoder.decode(plain)) as T }
+export const serializeEncrypted = (payload: EncryptedPayloadV1) => JSON.stringify(payload)
+export const parseEncrypted = (payload: string): EncryptedPayloadV1 => { const value: unknown = JSON.parse(payload); if (typeof value !== 'object' || value === null || (value as { cryptoVersion?: unknown }).cryptoVersion !== 1) throw new Error('Registo não está cifrado num formato suportado.'); return value as EncryptedPayloadV1 }
